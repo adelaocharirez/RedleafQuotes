@@ -1,31 +1,25 @@
-import { useState } from "react";
 import { ConsumableRow } from "./ConsumableRow";
-import { DEFAULT_CONSUMABLES, type ConsumableItem } from "../lib/quoteEngine";
+import type { ConsumableItem } from "../lib/quoteEngine";
 
-export function ConsumablesSection() {
-  const [consumables, setConsumables] = useState<ConsumableItem[]>(DEFAULT_CONSUMABLES);
+interface ConsumablesSectionProps {
+  consumables: ConsumableItem[];
+  onChange: (next: ConsumableItem[]) => void;
+}
 
+export function ConsumablesSection({ consumables, onChange }: ConsumablesSectionProps) {
   const toggleConsumable = (id: string) => {
-    setConsumables((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item))
-    );
+    onChange(consumables.map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item)));
   };
 
   const updateCost = (id: string, newCost: number) => {
-    setConsumables((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, defaultCost: newCost } : item))
-    );
+    onChange(consumables.map((item) => (item.id === id ? { ...item, defaultCost: newCost } : item)));
   };
 
   const updateName = (id: string, newName: string) => {
-    setConsumables((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, name: newName } : item))
-    );
+    onChange(consumables.map((item) => (item.id === id ? { ...item, name: newName } : item)));
   };
 
-  const totalConsumablesCost = consumables
-    .filter((c) => c.enabled)
-    .reduce((sum, c) => sum + c.defaultCost, 0);
+  const totalConsumablesCost = consumables.filter((c) => c.enabled).reduce((sum, c) => sum + c.defaultCost, 0);
 
   return (
     <div className="flex flex-col gap-3">

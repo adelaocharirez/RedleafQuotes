@@ -98,7 +98,7 @@ export function calculateQuote(inputs: QuoteInputs): QuoteBreakdown {
     //Markup, profit = cost x % 
 
     const clampedMarginPct = Math.max(0, inputs.targetProfitMarginPercent);
-    const profitAmount = totalExpenses + (clampedMarginPct / 100);
+    const profitAmount = totalExpenses * (clampedMarginPct / 100);
     const finalBidPrice = totalExpenses + profitAmount;
 
     const pricePerSqFt = faceSqFt > 0 ? finalBidPrice / faceSqFt : 0;
@@ -143,5 +143,12 @@ export function compareMargins(
     };
   });
 }
+
+export const DEFAULT_RATES = {
+  laborRatePerHour: 83,
+  overheadRatePerHour: 26,
+  targetProfitMarginPercent: 20,
+} as const;
+
 
 

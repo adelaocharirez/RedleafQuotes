@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { MaterialCard } from "./MaterialCard";
 import { CostInput } from "./CostInput";
+import type { MaterialSection as MaterialSectionData } from "../lib/quoteEngine";
 
 interface MaterialOption {
   id: string;
@@ -16,14 +16,17 @@ const MATERIAL_OPTIONS: MaterialOption[] = [
   { id: "concrete", name: "Concrete", icon: "🧱" },
 ];
 
-export function MaterialSection() {
-  const [selectedId, setSelectedId] = useState("");
-  const [mainCost, setMainCost] = useState(0);
-  const [caps, setCaps] = useState(0);
-  const [delivery, setDelivery] = useState(0);
-  const [rebates, setRebates] = useState(0);
+interface MaterialSectionProps {
+  value: MaterialSectionData;
+  onChange: (next: MaterialSectionData) => void;
+}
 
-  const totalMaterialCost = mainCost + caps + delivery + rebates;
+export function MaterialSection({ value, onChange }: MaterialSectionProps) {
+  const totalMaterialCost = value.mainCost + value.caps + value.delivery + value.rebates;
+
+  const selectMaterial = (option: MaterialOption) => {
+    onChange({ ...value, materialId: option.id, materialName: option.name, materialIcon: option.icon });
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -33,18 +36,18 @@ export function MaterialSection() {
             key={option.id}
             icon={option.icon}
             name={option.name}
-            selected={selectedId === option.id}
-            onClick={() => setSelectedId(option.id)}
+            selected={value.materialId === option.id}
+            onClick={() => selectMaterial(option)}
           />
         ))}
       </div>
 
-      {selectedId && (
+      {value.materialId && (
         <div className="flex flex-col gap-2 mt-2">
-          <CostInput label="Main Cost" value={mainCost} onChange={setMainCost} />
-          <CostInput label="Caps" value={caps} onChange={setCaps} />
-          <CostInput label="Delivery" value={delivery} onChange={setDelivery} />
-          <CostInput label="Rebates (negative)" value={rebates} onChange={setRebates} />
+          <CostInput label="Main Cost" value={value.mainCost} onChange={(n) => onChange({ ...value, mainCost: n })} />
+          <CostInput label="Caps" value={value.caps} onChange={(n) => onChange({ ...value, caps: n })} />
+          <CostInput label="Delivery" value={value.delivery} onChange={(n) => onChange({ ...value, delivery: n })} />
+          <CostInput label="Rebates (negative)" value={value.rebates} onChange={(n) => onChange({ ...value, rebates: n })} />
 
           <div className="mt-2 bg-ink rounded-2xl px-5 py-4 flex items-center justify-between">
             <span className="text-paper font-plex text-sm uppercase tracking-wide">Total Materials</span>
