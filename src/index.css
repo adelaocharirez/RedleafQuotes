@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root {
+@theme {
   --color-paper: #E3E1DC;
   --color-ink: #22201C;
   --color-amber: #C46A1E;

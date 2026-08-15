@@ -29,7 +29,7 @@ The pricing logic is built to match an existing set of Excel quotes we're replac
 
 - [x] Pricing engine (types + calculations)
 - [x] Length/height inputs with live sq ft
-- [ ] Material selection cards
+- [x] Material selection cards
 - [ ] Consumables checklist
 - [ ] Labor/overhead inputs + profit margin comparison
 - [ ] Final price summary screen
