@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root {
+  --color-paper: #E3E1DC;
+  --color-ink: #22201C;
+  --color-amber: #C46A1E;
+  --color-moss: #3F5D3A;
+  --color-surface: #FAF8F4;
+
+  --font-display: "Archivo Black", sans-serif;
+  --font-plex: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
