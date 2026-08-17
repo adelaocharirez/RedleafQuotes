@@ -5,6 +5,9 @@ import { ConsumablesSection } from "./components/ConsumablesSection";
 import { LaborOverheadSection } from "./components/LaborOverheadSection";
 import { MarginSelector } from "./components/MarginSelector";
 import { FinalSummary } from "./components/FinalSummary";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { DownloadExcelButton } from "./components/DownloadExcelButton";
+
 import {
   calculateQuote,
   DEFAULT_CONSUMABLES,
@@ -30,12 +33,12 @@ function App() {
   });
   const [consumables, setConsumables] = useState<ConsumableItem[]>(DEFAULT_CONSUMABLES);
   const [estimatedHours, setEstimatedHours] = useState(0);
-  const [laborRatePerHour, setLaborRatePerHour] = useState(DEFAULT_RATES.laborRatePerHour);
-  const [overheadRatePerHour, setOverheadRatePerHour] = useState(DEFAULT_RATES.overheadRatePerHour);
-  const [targetProfitMarginPercent, setTargetProfitMarginPercent] = useState(
+  const [laborRatePerHour, setLaborRatePerHour] = useLocalStorage("laborRatePerHour", DEFAULT_RATES.laborRatePerHour);
+  const [overheadRatePerHour, setOverheadRatePerHour] = useLocalStorage("overheadRatePerHour", DEFAULT_RATES.overheadRatePerHour);
+  const [targetProfitMarginPercent, setTargetProfitMarginPercent] = useLocalStorage(
+    "targetProfitMarginPercent",
     DEFAULT_RATES.targetProfitMarginPercent
-  );
-
+);
   const quoteInputs: QuoteInputs = {
     lengthFt,
     heightFt,
@@ -80,6 +83,8 @@ function App() {
       />
 
       <FinalSummary breakdown={breakdown} />
+      <DownloadExcelButton inputs={quoteInputs} breakdown={breakdown} />
+      
     </div>
   );
 }

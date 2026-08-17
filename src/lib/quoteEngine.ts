@@ -148,7 +148,7 @@ export const DEFAULT_RATES = {
   laborRatePerHour: 83,
   overheadRatePerHour: 26,
   targetProfitMarginPercent: 20,
-} as const;
+};
 
 
 

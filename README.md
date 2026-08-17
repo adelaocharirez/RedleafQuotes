@@ -30,9 +30,8 @@ The pricing logic is built to match an existing set of Excel quotes we're replac
 - [x] Pricing engine (types + calculations)
 - [x] Length/height inputs with live sq ft
 - [x] Material selection cards
-- [ ] Consumables checklist
-- [ ] Labor/overhead inputs + profit margin comparison
-- [ ] Final price summary screen
-- [ ] PDF export
+- [x] Consumables checklist
+- [x] Labor/overhead inputs + profit margin comparison
+- [x] Final price summary screen
 - [ ] PWA (installable, works offline, saves data locally)
 
