@@ -1,10 +1,10 @@
 import * as XLSX from "xlsx";
-import type { QuoteInputs, QuoteBreakdown } from "./quoteEngine";
+import type { QuoteInputs, QuoteBreakdown, FixedConsumable } from "./quoteEngine";
 
 export function exportQuoteToExcel(inputs: QuoteInputs, breakdown: QuoteBreakdown) {
   const misc = inputs.consumables.filter((c) => c.isRenamable);
 
-  const findCost = (id: string) => {
+  const findCost = (id: FixedConsumable) => {
     const item = inputs.consumables.find((c) => c.id === id);
     return item?.enabled ? item.defaultCost : 0;
   };
@@ -28,7 +28,7 @@ export function exportQuoteToExcel(inputs: QuoteInputs, breakdown: QuoteBreakdow
     ["Machine Rental", findCost("machineRental"), "Adjust if not renting a machine"],
     ["Gravel / Base", findCost("gravelBase"), "Enter gravel cost"],
     ["Drain Pipe", findCost("drainPipe"), "Enter drain pipe cost"],
-    ["Landscape Fabric", findCost("landscapeFabric"), "Enter fabric cost"],
+    ["Landscape Fabric", findCost("landscapingFabric"), "Enter fabric cost"],
     ["Rebar / Pins / Drill Bits", findCost("rebarPinsDrillBits"), "Enter hardware cost"],
     ["Adhesive / Glue", findCost("adhesiveGlue"), "Enter glue cost"],
     ...misc.map((item): (string | number)[] => [
