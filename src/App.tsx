@@ -53,8 +53,8 @@ function App() {
   const breakdown = calculateQuote(quoteInputs);
 
   return (
-    <div className="min-h-screen bg-paper p-4 flex flex-col gap-6 pb-32">
-      <h1 className="font-display text-2xl text-ink">New Quote</h1>
+    <div className="min-h-screen bg-paper px-60 py-15 flex flex-col gap-6 pb-32">
+      <h1 className="font-display text-2xl text-ink">Brian's Quote Generator</h1>
 
       <ProjectDetails
         lengthFt={lengthFt}
