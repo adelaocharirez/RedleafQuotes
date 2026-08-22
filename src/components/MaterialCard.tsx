@@ -1,20 +1,32 @@
+import { BrickWall, TreePine } from "lucide-react";
+
 interface MaterialCardProps {
-  icon: string;
+  kind: "timber" | "block";
   name: string;
   selected: boolean;
   onClick: () => void;
 }
 
-export function MaterialCard({ icon, name, selected, onClick }: MaterialCardProps) {
+export function MaterialCard({ kind, name, selected, onClick }: MaterialCardProps) {
+  const Icon = kind === "timber" ? TreePine : BrickWall;
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-2 rounded-2xl px-4 py-5 border-2 transition ${
-        selected ? "border-amber bg-amber/10" : "border-transparent bg-surface"
+      aria-pressed={selected}
+      className={`flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-3 border transition-colors ${
+        selected
+          ? "border-amber bg-amber/[0.08] text-ink"
+          : "border-ink/10 bg-surface text-ink/70 active:bg-ink/[0.04]"
       }`}
     >
-      <span className="text-4xl">{icon}</span>
-      <span className="font-plex text-ink text-sm text-center">{name}</span>
+      <Icon
+        size={18}
+        strokeWidth={1.75}
+        className={selected ? "text-amber" : "text-ink/40"}
+        aria-hidden="true"
+      />
+      <span className="font-plex text-[11px] leading-tight text-center">{name}</span>
     </button>
   );
 }

@@ -1,19 +1,21 @@
+import { Card, SectionHeader } from "./ui/Card";
 import { MaterialCard } from "./MaterialCard";
 import { CostInput } from "./CostInput";
+import { money } from "../lib/format";
 import type { MaterialSection as MaterialSectionData } from "../lib/quoteEngine";
 
 interface MaterialOption {
   id: string;
   name: string;
-  icon: string;
+  kind: "timber" | "block";
 }
 
 const MATERIAL_OPTIONS: MaterialOption[] = [
-  { id: "green-timber", name: "Green Timber", icon: "🪵" },
-  { id: "railroad-ties", name: "Railroad Ties", icon: "🪵" },
-  { id: "used-timbers", name: "Used Timbers", icon: "🪵" },
-  { id: "retaining-blocks", name: "Retaining Blocks", icon: "🧱" },
-  { id: "concrete", name: "Concrete", icon: "🧱" },
+  { id: "green-timber", name: "Green Timber", kind: "timber" },
+  { id: "railroad-ties", name: "Railroad Ties", kind: "timber" },
+  { id: "used-timbers", name: "Used Timbers", kind: "timber" },
+  { id: "retaining-blocks", name: "Retaining Blocks", kind: "block" },
+  { id: "concrete", name: "Concrete", kind: "block" },
 ];
 
 interface MaterialSectionProps {
@@ -22,39 +24,72 @@ interface MaterialSectionProps {
 }
 
 export function MaterialSection({ value, onChange }: MaterialSectionProps) {
-  const totalMaterialCost = value.mainCost + value.caps + value.delivery + value.rebates;
-
-  const selectMaterial = (option: MaterialOption) => {
-    onChange({ ...value, materialId: option.id, materialName: option.name, materialIcon: option.icon });
-  };
+  const total = value.mainCost + value.caps + value.delivery + value.rebates;
+  // Rebates are entered negative, so a positive entry inflates the bid. That's
+  // the likelier data-entry slip and it silently raises the price.
+  const rebateWrongSign = value.rebates > 0;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-3 gap-3">
+    <section>
+      <SectionHeader label="MATERIALS" value={value.materialId ? money(total) : undefined} />
+
+      <div className="grid grid-cols-3 gap-2 mb-2">
         {MATERIAL_OPTIONS.map((option) => (
           <MaterialCard
             key={option.id}
-            icon={option.icon}
+            kind={option.kind}
             name={option.name}
             selected={value.materialId === option.id}
-            onClick={() => selectMaterial(option)}
+            onClick={() =>
+              onChange({
+                ...value,
+                materialId: option.id,
+                materialName: option.name,
+                materialIcon: "",
+              })
+            }
           />
         ))}
       </div>
 
       {value.materialId && (
-        <div className="flex flex-col gap-2 mt-2">
-          <CostInput label="Main Cost" value={value.mainCost} onChange={(n) => onChange({ ...value, mainCost: n })} />
-          <CostInput label="Caps" value={value.caps} onChange={(n) => onChange({ ...value, caps: n })} />
-          <CostInput label="Delivery" value={value.delivery} onChange={(n) => onChange({ ...value, delivery: n })} />
-          <CostInput label="Rebates (negative)" value={value.rebates} onChange={(n) => onChange({ ...value, rebates: n })} />
+        <>
+          <Card>
+            <CostInput
+              label="Main cost"
+              value={value.mainCost}
+              onChange={(mainCost) => onChange({ ...value, mainCost })}
+            />
+            <CostInput
+              label="Caps"
+              value={value.caps}
+              onChange={(caps) => onChange({ ...value, caps })}
+            />
+            <CostInput
+              label="Delivery"
+              value={value.delivery}
+              onChange={(delivery) => onChange({ ...value, delivery })}
+            />
+            <CostInput
+              label="Rebates"
+              hint="Enter as a negative, e.g. -250"
+              value={value.rebates}
+              onChange={(rebates) => onChange({ ...value, rebates })}
+            />
+          </Card>
 
-          <div className="mt-2 bg-ink rounded-2xl px-5 py-4 flex items-center justify-between">
-            <span className="text-paper font-plex text-sm uppercase tracking-wide">Total Materials</span>
-            <span className="text-amber font-mono text-3xl tabular-nums">${totalMaterialCost.toFixed(2)}</span>
-          </div>
-        </div>
+          {rebateWrongSign && (
+            <p className="mt-2 text-[11px] font-plex text-amber px-0.5">
+              Rebates should be negative — a positive amount raises the bid.
+            </p>
+          )}
+          {total < 0 && (
+            <p className="mt-2 text-[11px] font-plex text-amber px-0.5">
+              Material total is negative. Check the rebate amount.
+            </p>
+          )}
+        </>
       )}
-    </div>
+    </section>
   );
 }

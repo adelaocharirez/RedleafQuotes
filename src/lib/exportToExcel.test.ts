@@ -30,10 +30,11 @@ const everythingOn: QuoteInputs = {
   targetProfitMarginPercent: 20,
 };
 
-const OUT = "quote.xlsx";
+const LABEL = "Adrian";
+const OUT = `${LABEL}.xlsx`;
 
 function readBack(inputs: QuoteInputs) {
-  exportQuoteToExcel(inputs, calculateQuote(inputs));
+  exportQuoteToExcel(inputs, calculateQuote(inputs), LABEL);
   const wb = XLSX.readFile(OUT);
   const sheet = wb.Sheets[wb.SheetNames[0]];
   return XLSX.utils.sheet_to_json<(string | number)[]>(sheet, { header: 1 });
@@ -46,7 +47,25 @@ function valueOf(rows: (string | number)[][], label: string): number {
 }
 
 afterAll(() => {
-  if (existsSync(OUT)) unlinkSync(OUT);
+  for (const f of [OUT, "Quote.xlsx"]) if (existsSync(f)) unlinkSync(f);
+});
+
+describe("exportToExcel — filename and sheet name", () => {
+  it("names the file after the quote label", () => {
+    exportQuoteToExcel(everythingOn, calculateQuote(everythingOn), LABEL);
+    expect(existsSync(`${LABEL}.xlsx`)).toBe(true);
+  });
+
+  it("falls back to Quote when no label is given", () => {
+    exportQuoteToExcel(everythingOn, calculateQuote(everythingOn));
+    expect(existsSync("Quote.xlsx")).toBe(true);
+  });
+
+  it("uses the label as the sheet name", () => {
+    exportQuoteToExcel(everythingOn, calculateQuote(everythingOn), LABEL);
+    const wb = XLSX.readFile(`${LABEL}.xlsx`);
+    expect(wb.SheetNames[0]).toBe(LABEL);
+  });
 });
 
 describe("exportToExcel — internal consistency", () => {

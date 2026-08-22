@@ -1,90 +1,115 @@
 import { useState } from "react";
+import { ClientSection } from "./components/ClientSection";
 import { ProjectDetails } from "./components/ProjectDetails";
 import { MaterialSection } from "./components/MaterialSection";
 import { ConsumablesSection } from "./components/ConsumablesSection";
 import { LaborOverheadSection } from "./components/LaborOverheadSection";
 import { MarginSelector } from "./components/MarginSelector";
 import { FinalSummary } from "./components/FinalSummary";
-import { useLocalStorage } from "./hooks/useLocalStorage";
-import { DownloadExcelButton } from "./components/DownloadExcelButton";
-
-import {
-  calculateQuote,
-  DEFAULT_CONSUMABLES,
-  DEFAULT_RATES,
-} from "./lib/quoteEngine";
-import type {
-  ConsumableItem,
-  MaterialSection as MaterialSectionData,
-  QuoteInputs,
-} from "./lib/quoteEngine";
+import { useQuoteForm } from "./hooks/useQuoteForm";
 
 function App() {
-  const [lengthFt, setLengthFt] = useState(0);
-  const [heightFt, setHeightFt] = useState(0);
-  const [materialSection, setMaterialSection] = useState<MaterialSectionData>({
-    materialId: "",
-    materialName: "",
-    materialIcon: "",
-    mainCost: 0,
-    caps: 0,
-    delivery: 0,
-    rebates: 0,
-  });
-  const [consumables, setConsumables] = useState<ConsumableItem[]>(DEFAULT_CONSUMABLES);
-  const [estimatedHours, setEstimatedHours] = useState(0);
-  const [laborRatePerHour, setLaborRatePerHour] = useLocalStorage("laborRatePerHour", DEFAULT_RATES.laborRatePerHour);
-  const [overheadRatePerHour, setOverheadRatePerHour] = useLocalStorage("overheadRatePerHour", DEFAULT_RATES.overheadRatePerHour);
-  const [targetProfitMarginPercent, setTargetProfitMarginPercent] = useLocalStorage(
-    "targetProfitMarginPercent",
-    DEFAULT_RATES.targetProfitMarginPercent
-);
-  const quoteInputs: QuoteInputs = {
-    lengthFt,
-    heightFt,
-    materialSection,
-    consumables,
-    estimatedHours,
-    laborRatePerHour,
-    overheadRatePerHour,
-    targetProfitMarginPercent,
-  };
-
-  const breakdown = calculateQuote(quoteInputs);
+  const quote = useQuoteForm();
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   return (
-    <div className="min-h-screen bg-paper p-4 flex flex-col gap-6 pb-32">
-      <h1 className="font-display text-2xl text-ink">New Quote</h1>
+    <div className="min-h-screen bg-paper">
+      <div className="mx-auto max-w-md pb-44">
+        <header className="bg-surface border-b border-ink/[0.09] px-4 pt-4 pb-3.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-plex font-semibold tracking-[0.16em] text-ink/40">
+              REDLEAF
+            </span>
+            {quote.restored && (
+              <span className="flex items-center gap-1.5 bg-moss/10 px-2 py-0.5 rounded-full">
+                <span className="w-[5px] h-[5px] rounded-full bg-moss" />
+                <span className="text-[10px] font-plex font-semibold text-moss tracking-wide">
+                  SAVED
+                </span>
+              </span>
+            )}
+          </div>
 
-      <ProjectDetails
-        lengthFt={lengthFt}
-        heightFt={heightFt}
-        onLengthChange={setLengthFt}
-        onHeightChange={setHeightFt}
-      />
+          <div className="flex items-start justify-between gap-3 mt-1.5">
+            <h1 className="font-display text-[22px] leading-tight text-ink tracking-[-0.022em] truncate">
+              {quote.client.name.trim() || "New Quote"}
+            </h1>
 
-      <MaterialSection value={materialSection} onChange={setMaterialSection} />
+            {!quote.isEmpty &&
+              (confirmingReset ? (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      quote.reset();
+                      setConfirmingReset(false);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-ink text-paper text-xs font-plex"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingReset(false)}
+                    className="px-2.5 py-1.5 rounded-lg border border-ink/15 text-ink text-xs font-plex"
+                  >
+                    Keep
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingReset(true)}
+                  className="shrink-0 px-2.5 py-1.5 rounded-lg border border-ink/15 text-ink/70 text-xs font-plex active:bg-ink/[0.04]"
+                >
+                  New
+                </button>
+              ))}
+          </div>
 
-      <ConsumablesSection consumables={consumables} onChange={setConsumables} />
+          {quote.summaryLine && (
+            <p className="text-[12.5px] text-ink/45 mt-0.5 truncate">{quote.summaryLine}</p>
+          )}
+        </header>
 
-      <LaborOverheadSection
-        estimatedHours={estimatedHours}
-        laborRatePerHour={laborRatePerHour}
-        overheadRatePerHour={overheadRatePerHour}
-        onHoursChange={setEstimatedHours}
-        onLaborRateChange={setLaborRatePerHour}
-        onOverheadRateChange={setOverheadRatePerHour}
-      />
+        <main className="px-4 pt-4 flex flex-col gap-4">
+          <ClientSection value={quote.client} onChange={quote.setClient} />
 
-      <MarginSelector
-        inputs={quoteInputs}
-        selectedMargin={targetProfitMarginPercent}
-        onSelect={setTargetProfitMarginPercent}
-      />
+          <ProjectDetails
+            lengthFt={quote.inputs.lengthFt}
+            heightFt={quote.inputs.heightFt}
+            onLengthChange={quote.setLengthFt}
+            onHeightChange={quote.setHeightFt}
+          />
 
-      <FinalSummary breakdown={breakdown} />
-      <DownloadExcelButton inputs={quoteInputs} breakdown={breakdown} />
-      
+          <MaterialSection
+            value={quote.inputs.materialSection}
+            onChange={quote.setMaterialSection}
+          />
+
+          <ConsumablesSection
+            consumables={quote.inputs.consumables}
+            onChange={quote.setConsumables}
+          />
+
+          <LaborOverheadSection
+            estimatedHours={quote.inputs.estimatedHours}
+            laborRatePerHour={quote.inputs.laborRatePerHour}
+            overheadRatePerHour={quote.inputs.overheadRatePerHour}
+            onHoursChange={quote.setEstimatedHours}
+            onLaborRateChange={quote.setLaborRatePerHour}
+            onOverheadRateChange={quote.setOverheadRatePerHour}
+          />
+
+          <MarginSelector
+            inputs={quote.inputs}
+            selectedMargin={quote.inputs.targetProfitMarginPercent}
+            onSelect={quote.setTargetProfitMarginPercent}
+          />
+        </main>
+      </div>
+
+      <FinalSummary doc={quote.doc} breakdown={quote.breakdown} />
     </div>
   );
 }

@@ -1,4 +1,6 @@
+import { Card, SectionHeader } from "./ui/Card";
 import { ConsumableRow } from "./ConsumableRow";
+import { money } from "../lib/format";
 import type { ConsumableItem } from "../lib/quoteEngine";
 
 interface ConsumablesSectionProps {
@@ -7,40 +9,33 @@ interface ConsumablesSectionProps {
 }
 
 export function ConsumablesSection({ consumables, onChange }: ConsumablesSectionProps) {
-  const toggleConsumable = (id: string) => {
-    onChange(consumables.map((item) => (item.id === id ? { ...item, enabled: !item.enabled } : item)));
-  };
+  const patch = (id: string, patch: Partial<ConsumableItem>) =>
+    onChange(consumables.map((item) => (item.id === id ? { ...item, ...patch } : item)));
 
-  const updateCost = (id: string, newCost: number) => {
-    onChange(consumables.map((item) => (item.id === id ? { ...item, defaultCost: newCost } : item)));
-  };
-
-  const updateName = (id: string, newName: string) => {
-    onChange(consumables.map((item) => (item.id === id ? { ...item, name: newName } : item)));
-  };
-
-  const totalConsumablesCost = consumables.filter((c) => c.enabled).reduce((sum, c) => sum + c.defaultCost, 0);
+  const activeCount = consumables.filter((c) => c.enabled).length;
+  const total = consumables.filter((c) => c.enabled).reduce((sum, c) => sum + c.defaultCost, 0);
 
   return (
-    <div className="flex flex-col gap-3">
-      {consumables.map((item) => (
-        <ConsumableRow
-          key={item.id}
-          icon={item.icon}
-          name={item.name}
-          enabled={item.enabled}
-          cost={item.defaultCost}
-          isRenamable={item.isRenamable}
-          onToggle={() => toggleConsumable(item.id)}
-          onNameChange={(newName) => updateName(item.id, newName)}
-          onCostChange={(newCost) => updateCost(item.id, newCost)}
-        />
-      ))}
-
-      <div className="mt-2 bg-ink rounded-2xl px-5 py-4 flex items-center justify-between">
-        <span className="text-paper font-plex text-sm uppercase tracking-wide">Total Consumables</span>
-        <span className="text-amber font-mono text-3xl tabular-nums">${totalConsumablesCost.toFixed(2)}</span>
-      </div>
-    </div>
+    <section>
+      <SectionHeader
+        label="CONSUMABLES"
+        value={activeCount > 0 ? `${activeCount} on · ${money(total)}` : undefined}
+      />
+      <Card>
+        {consumables.map((item) => (
+          <ConsumableRow
+            key={item.id}
+            id={item.id}
+            name={item.name}
+            enabled={item.enabled}
+            cost={item.defaultCost}
+            isRenamable={item.isRenamable}
+            onToggle={() => patch(item.id, { enabled: !item.enabled })}
+            onNameChange={(name) => patch(item.id, { name })}
+            onCostChange={(defaultCost) => patch(item.id, { defaultCost })}
+          />
+        ))}
+      </Card>
+    </section>
   );
 }

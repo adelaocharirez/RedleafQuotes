@@ -1,7 +1,11 @@
 import * as XLSX from "xlsx";
 import type { QuoteInputs, QuoteBreakdown, FixedConsumable } from "./quoteEngine";
 
-export function exportQuoteToExcel(inputs: QuoteInputs, breakdown: QuoteBreakdown) {
+export function exportQuoteToExcel(
+  inputs: QuoteInputs,
+  breakdown: QuoteBreakdown,
+  label = "Quote"
+) {
   const misc = inputs.consumables.filter((c) => c.isRenamable);
 
   const findCost = (id: FixedConsumable) => {
@@ -65,8 +69,9 @@ export function exportQuoteToExcel(inputs: QuoteInputs, breakdown: QuoteBreakdow
   worksheet["!cols"] = [{ wch: 28 }, { wch: 12 }, { wch: 32 }];
 
   const workbook = XLSX.utils.book_new();
-  const sheetName = inputs.materialSection.materialName || "Quote";
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+  // label is already stripped of characters Excel rejects in sheet names and
+  // truncated to the 31-char limit (see quoteLabel).
+  XLSX.utils.book_append_sheet(workbook, worksheet, label);
 
-  XLSX.writeFile(workbook, "quote.xlsx");
+  XLSX.writeFile(workbook, `${label}.xlsx`);
 }
